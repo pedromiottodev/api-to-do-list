@@ -1,0 +1,220 @@
+Onde:
+
+routes.js → define as rotas (GET, POST, PUT, DELETE) com funções bem simples
+
+app.js → sobe o servidor e usa o roteador
+
+Tudo usando só import/export padrão, sem complicação.
+
+RODANDO O ARQUIVO: node src/app.js ou npx nodemon src/app.js
+
+
+Primeiro passo:
+criar uma pasta package.json através de npm init -y
+
+O que faz?
+Cria o arquivo package.json, que:
+
+Diz que este diretório é um projeto Node.js
+
+Armazena as dependências do projeto
+
+Guarda os scripts que usamos com npm run
+
+O -y?
+Aceita todas as opções padrão (nome, versão, etc.)
+
+Você pode editar depois
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Segundo passo:
+instalar o express através de npm install express
+
+O que faz?
+Instala o Express, que é o micro framework que usamos para:
+
+Criar o servidor
+
+Criar rotas HTTP
+
+Lidar com requisições/respostas de forma fácil
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------
+Terceiro passo:
+instalar o nodemon para o servidor recarregar sozinho quando salvar através de npm install nodemon -D (-D pq será uma dependência de desenvolvimento, não queremos que vá para produção)
+
+O que é nodemon?
+É um utilitário que reinicia o servidor automaticamente sempre que um arquivo muda.
+
+Assim você não precisa toda hora parar e rodar de novo node app.js.
+
+E o -D?
+Significa:
+
+“Instala como dependência de desenvolvimento”
+
+Ou seja:
+
+nodemon só é usado durante o desenvolvimento
+
+Ele não vai ser necessário em produção (quando o projeto estiver rodando em um servidor real)
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Quarto passo:
+configurar o package.json para usar import/export
+"type": "module"
+
+"type": "module" no package.json
+Por que isso?
+O Node.js por padrão usa o sistema antigo de módulos:
+
+const express = require('express')
+Mas com "type": "module", a gente diz pro Node:
+
+"Queremos usar o sistema moderno de módulos do JavaScript (ES Modules)"
+
+Ou seja, com isso a gente pode usar:
+import express from 'express'
+export default ...
+✅ Mais limpo, mais moderno e é o padrão atual de bibliotecas.
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------
+Quinto passo:
+scripts": { "dev": "nodemon src/app.js" }
+Pra que isso?
+Assim você pode rodar o projeto com:
+
+npm run dev
+Ao invés de digitar npx nodemon src/app.js toda vez.
+
+É um atalho, um script personalizado.
+
+O que é um Middleware?
+✅ Definição simples:
+Um middleware é uma função intermediária que roda antes de chegar na rota final.
+
+Ela pode:
+
+Verificar algo (ex: validação, autenticação)
+
+Modificar a requisição (req) ou a resposta (res)
+
+Bloquear ou deixar passar
+
+Chamar a próxima etapa com next()
+
+Em código, a estrutura de um middleware é:
+function nomeDoMiddleware(req, res, next) {
+  // faz algo com req ou res
+
+  // se estiver tudo certo, deixa seguir
+  next()
+}
+
+tapa 5 – Integração com Banco de Dados
+📦 Tecnologias que vamos usar:
+SQLite: banco leve, não precisa instalar nada externo
+
+Prisma ORM: pra manipular o banco de forma simples e organizada
+
+🧰 Etapas da configuração:
+✅ 1. Instalar o Prisma
+No terminal, dentro da pasta do seu projeto:
+
+bash
+Copy code
+npm install prisma --save-dev
+npx prisma init
+Isso vai criar uma pasta chamada prisma/ com o arquivo schema.prisma, e o .env.
+
+✅ 2. Instalar o cliente Prisma
+bash
+Copy code
+npm install @prisma/client
+Esse é quem vai permitir que sua aplicação se conecte ao banco.
+
+✅ 3. Configurar o banco no .env
+Abra o arquivo .env que foi criado e altere a linha:
+
+env
+Copy code
+DATABASE_URL="file:./dev.db"
+Pode deixar exatamente assim, ele criará um arquivo dev.db dentro da pasta do projeto.
+
+
+O que é prisma?
+O Prisma é uma ferramenta que ajuda a gente a conversar com o banco de dados usando JavaScript/Node.
+Sem Prisma, você teria que escrever comandos como:
+INSERT INTO tarefas (titulo, descricao, concluida) VALUES (...)
+Com o Prisma, a gente usa comandos em JavaScript, tipo:
+prisma.tarefa.create({...})
+
+O que é uma migração no contexto de banco de dados?
+Migração é um registro de mudança na estrutura do banco de dados.
+
+Sempre que você altera o que existe no banco (como criar uma tabela, renomear um campo, adicionar uma coluna), você precisa "migrar" essa alteração para o banco de dados real.
+
+📦 Exemplo prático:
+Você escreve isso no schema.prisma:
+
+prisma
+Copy
+Edit
+model Tarefa {
+  id         Int      @id @default(autoincrement())
+  titulo     String
+  descricao  String
+  concluido  Boolean  @default(false)
+}
+Mas o banco ainda está assim:
+
+bash
+Copy
+Edit
+id | titulo | descricao | concluida
+Ou seja, o banco ainda tem concluida com “a”, e não tem o campo concluido.
+
+🛠️ O que a migração faz?
+Quando você roda:
+
+bash
+Copy
+Edit
+npx prisma migrate dev --name renomear_concluida
+O Prisma:
+
+Detecta a diferença entre seu schema atual e o banco
+
+Gera um script SQL pra corrigir isso
+
+Executa esse script e atualiza o banco de dados real
+
+🧠 Analogia simples:
+O schema.prisma é o projeto arquitetônico da sua casa.
+A migração é o pedreiro executando as mudanças (levantar parede nova, quebrar outra, etc).
+
+✅ Quando você faz uma migração?
+Criou um model novo? → precisa migrar.
+
+Adicionou um campo? → precisa migrar.
+
+Mudou o nome de um campo? → precisa migrar.
+
+Apagou uma coluna? → precisa migrar.
+
+📁 Onde ficam armazenadas?
+O Prisma guarda cada migração em uma pasta prisma/migrations/, com o nome que você escolheu, tipo:
+
+bash
+Copy
+Edit
+prisma/migrations/20250429_renomear_concluida/
+Assim você tem um histórico de tudo que já mudou no banco.
+
+✅ Resumo final:
+Conceito	O que é
+Migração	Atualização da estrutura do banco baseada no schema.prisma
+Quando usar	Sempre que mudar o model no schema.prisma
+Como rodar	npx prisma migrate dev --name nome_da_migracao
